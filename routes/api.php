@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Okta\JwtVerifier\Adaptors\FirebasePhpJwt;
 use Okta\JwtVerifier\JwtVerifierBuilder;
+require_once("../vendor/autoload.php"); // This should be replaced with your path to your vendor/autoload.php file
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +17,7 @@ use Okta\JwtVerifier\JwtVerifierBuilder;
 |
 */
 
-Route::middleware(['auth:sanctum'])->get('/users', function (Request $request) {
+Route::get('/users', function (Request $request) {
 
     $jwtVerifier = (new JwtVerifierBuilder())
             ->setAdaptor(new FirebasePhpJwt())
@@ -27,10 +28,15 @@ Route::middleware(['auth:sanctum'])->get('/users', function (Request $request) {
     return $jwtVerifier->toJson();
 });
 
-Route::post('register', [\App\Http\Controllers\AuthController::class, 'register']);
-Route::post('login', [\App\Http\Controllers\AuthController::class, 'login']);
+Route::group([
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('user', [\App\Http\Controllers\AuthController::class, 'user']);
-    Route::post('logout', [\App\Http\Controllers\AuthController::class, 'logout']);
+    'middleware' => 'api',
+
+], function ($router) {
+
+    Route::post('login', [\App\Http\Controllers\AuthController::class,'login']);
+    Route::post('logout', [\App\Http\Controllers\AuthController::class,'logout']);
+    Route::post('refresh', [\App\Http\Controllers\AuthController::class,'refresh']);
+    Route::post('me', [\App\Http\Controllers\AuthController::class,'me']);
+
 });
